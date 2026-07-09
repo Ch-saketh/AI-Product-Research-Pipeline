@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Product Research Pipeline | Case Study</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+
+    <!-- 1. Cover / Hero -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <span class="badge">Composio Product Operations Assignment</span>
+            <h1 class="hero-title">AI Product Research Pipeline</h1>
+            <p class="hero-subtitle">Automated SaaS API Research, Verification and Analysis</p>
+            <div class="hero-buttons">
+                <a href="https://github.com/Ch-saketh/compose-agent-workflow" target="_blank" class="btn btn-primary">GitHub Repository</a>
+                <a href="https://saketh-chokkapu-portfolio.vercel.app" target="_blank" class="btn btn-secondary">Portfolio</a>
+                <a href="https://www.linkedin.com/in/saketh-chokkapu-3a668a2b9/" target="_blank" class="btn btn-secondary">LinkedIn</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. Problem Statement -->
+    <section class="text-section">
+        <div class="section-header">
+            <h2>🎯 Problem Statement</h2>
+        </div>
+        <div class="text-content">
+            <p>Evaluating third-party SaaS applications for integration potential is traditionally a highly manual and time-consuming process. Product Operations engineers and Developer Advocates often spend hours digging through disparate developer portals to uncover authentication methods, API limitations, and Multi-Cloud Platform (MCP) support.</p>
+            <p>This manual approach doesn't scale when a platform needs to rapidly assess hundreds of potential integration targets to build a comprehensive agentic ecosystem.</p>
+        </div>
+    </section>
+
+    <!-- 3. Assignment Objective -->
+    <section class="text-section">
+        <div class="section-header">
+            <h2>📋 Assignment Objective</h2>
+        </div>
+        <div class="text-content">
+            <p>The core objective of this assignment was to build an autonomous pipeline capable of researching 100 SaaS applications, analyzing their API documentation, and determining their "Agent Buildability."</p>
+            <p>To succeed, the system needed to act as a resilient data pipeline that not only queries large language models (LLMs) but also cross-verifies the extracted data for accuracy, ensuring that downstream engineering decisions are based on high-confidence insights.</p>
+        </div>
+    </section>
+
+    <!-- 4. Solution Overview -->
+    <section class="text-section">
+        <div class="section-header">
+            <h2>💡 Solution Overview</h2>
+        </div>
+        <div class="text-content">
+            <p>I architected a modular, multi-agent AI pipeline driven by Google's Gemini Pro. Rather than attempting a massive, brittle zero-shot prompt, the system relies on specialized, decoupled agents.</p>
+            <ul class="feature-list">
+                <li><strong>CSV-Driven Data Layer:</strong> A simple <code>apps.csv</code> acts as the single source of truth, allowing non-technical stakeholders to queue new applications effortlessly without touching the codebase.</li>
+                <li><strong>JSON Intermediate State:</strong> By enforcing strict JSON schema outputs from the LLM, the pipeline caches raw data locally. This prevents data loss on failures, avoids redundant API calls, and allows the final presentation layer to be rebuilt instantly.</li>
+                <li><strong>Isolated Verification:</strong> Recognizing that LLMs occasionally hallucinate URLs or hallucinate API features, a dedicated Verification Agent audits the initial research.</li>
+                <li><strong>Decoupled Analyzer & HTML Deliverable:</strong> Analytics are separated from data gathering. Generating a static HTML file ensures the final report is portable, zero-dependency, and instantly deployable to any static hosting provider.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- 5. System Architecture -->
+    <section class="architecture-section">
+        <div class="section-header">
+            <h2>⚙️ System Architecture</h2>
+            <p>A layered approach separating data ingestion, core LLM processing, and presentation.</p>
+        </div>
+        <div class="mermaid-container">
+            
+<div class="mermaid">
+flowchart TD
+    CSV --> PromptBuilder[Prompt Builder]
+    PromptBuilder --> LLM
+    LLM --> Discovery
+    Discovery --> Research
+    Research --> Verification
+    Verification --> JSON
+    JSON --> Analyzer
+    Analyzer --> HTMLGenerator[HTML Generator]
+</div>
+
+        </div>
+    </section>
+
+    <!-- 6. Research Workflow -->
+    <section class="pipeline-section">
+        <div class="section-header">
+            <h2>🔄 Research Workflow</h2>
+            <p>The step-by-step data transformation pipeline executed for every application.</p>
+        </div>
+        <div class="mermaid-container">
+            
+<div class="mermaid">
+flowchart TD
+    A[apps.csv] --> B[Research Agent]
+    B --> C[Verification]
+    C --> D[Analyzer]
+    D --> E[HTML Report]
+</div>
+
+        </div>
+    </section>
+
+    <!-- 7. Project Structure -->
+    <section class="text-section">
+        <div class="section-header">
+            <h2>📁 Project Structure</h2>
+        </div>
+        <div class="code-card">
+<pre><code>project/
+├── data/
+│   ├── apps.csv           # Input data source
+│   └── processed/         # Cached intermediate JSON results
+├── output/
+│   ├── analysis.json      # Aggregated metrics
+│   └── report.html        # Final static deliverable
+├── prompts/               # Prompt templates (Markdown)
+├── src/
+│   ├── discovery.py       # Documentation search agent
+│   ├── researcher.py      # Data extraction agent
+│   ├── verifier.py        # Accuracy audit agent
+│   ├── analyzer.py        # Metric aggregation
+│   └── report.py          # HTML template injection
+└── templates/             # HTML/CSS/JS frontend assets</code></pre>
+        </div>
+    </section>
+
+    <!-- 8. Agent Responsibilities -->
+    <section class="text-section">
+        <div class="section-header">
+            <h2>🤖 Agent Responsibilities</h2>
+        </div>
+        <div class="agent-grid">
+            <div class="agent-card">
+                <h3>1. Discovery Agent</h3>
+                <p>Identifies the canonical developer documentation, API references, and pricing pages to anchor the research in factual sources.</p>
+            </div>
+            <div class="agent-card">
+                <h3>2. Research Agent</h3>
+                <p>Crawls the discovered URLs and extracts structured information strictly adhering to the expected JSON schema.</p>
+            </div>
+            <div class="agent-card">
+                <h3>3. Verification Agent</h3>
+                <p>Acts as an adversarial auditor. It scores the confidence of the research and applies automated corrections if assumptions were made.</p>
+            </div>
+            <div class="agent-card">
+                <h3>4. Analyzer</h3>
+                <p>Aggregates the individual verified JSON files to compute pipeline-wide metrics, distributions, and key insights.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Executive Summary (Moved here to preface the Matrix) -->
+    <section class="summary-section">
+        <div class="section-header">
+            <h2>📊 Executive Summary</h2>
+            <p>High-level metrics generated from the processed dataset.</p>
+        </div>
+        
+        <!-- Implementation Note -->
+        <div class="info-card" style="margin-bottom: 24px;">
+            <h3>Implementation Note</h3>
+            <p>This report demonstrates the complete research workflow using a representative sample of applications.</p>
+            <p>The pipeline is designed to process all 100 applications listed in <code>data/apps.csv</code>. During development, Google Gemini API free-tier quota limits (max 20 requests per day) prevented processing the complete dataset in a single run.</p>
+            <p><strong>To generate the complete report:</strong> Add a valid API key to <code>.env</code>, run <code>main.py</code>, and this HTML file will dynamically regenerate with the full dataset.</p>
+        </div>
+
+        <div class="summary-grid">
+            
+<div class="summary-card">
+    <h3>Total Applications</h3>
+    <h1>8</h1>
+</div>
+<div class="summary-card">
+    <h3>Categories</h3>
+    <h1>8</h1>
+</div>
+<div class="summary-card">
+    <h3>Buildable Applications</h3>
+    <h1>8</h1>
+</div>
+<div class="summary-card">
+    <h3>Average Confidence</h3>
+    <h1>94.86%</h1>
+</div>
+<div class="summary-card">
+    <h3>Verified Applications</h3>
+    <h1>5</h1>
+</div>
+<div class="summary-card">
+    <h3>Corrections</h3>
+    <h1>5</h1>
+</div>
+
+        </div>
+    </section>
+
+    <!-- 9. Research Matrix -->
+    <section class="research-section">
+        <div class="section-header">
+            <h2>🗄️ Research Matrix</h2>
+            <p>Complete structured dataset generated by the AI research pipeline.</p>
+        </div>
+        
+        <div class="table-toolbar">
+            <input type="text" placeholder="Search applications..." id="searchInput">
+            <select id="filterCategory">
+                <option value="">All Categories</option>
+            </select>
+            <select id="filterAuth">
+                <option value="">All Auth Methods</option>
+            </select>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="researchTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">Application ↕</th>
+                        <th onclick="sortTable(1)">Category ↕</th>
+                        <th onclick="sortTable(2)">Description ↕</th>
+                        <th onclick="sortTable(3)">Authentication ↕</th>
+                        <th onclick="sortTable(4)">Self Serve ↕</th>
+                        <th onclick="sortTable(5)">API Type ↕</th>
+                        <th onclick="sortTable(6)">API Coverage ↕</th>
+                        <th onclick="sortTable(7)">MCP ↕</th>
+                        <th onclick="sortTable(8)">Buildability ↕</th>
+                        <th onclick="sortTable(9)">Main Blocker ↕</th>
+                        <th onclick="sortTable(10)">Confidence ↕</th>
+                        <th onclick="sortTable(11)">Verified ↕</th>
+                        <th>Auth Docs</th>
+                        <th>API Docs</th>
+                        <th>Pricing Docs</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    
+<tr>
+<td>-</td>
+<td>Sales CRM Platform</td>
+<td>Close is a sales-focused CRM platform designed to help sales teams communicate, manage leads, and close deals efficiently.</td>
+<td>API Key or OAuth 2.0</td>
+<td>Yes</td>
+<td>REST + Webhooks</td>
+<td>Broad</td>
+<td>No</td>
+<td>Yes</td>
+<td>Lack of MCP support for advanced integrations.</td>
+<td>95</td>
+<td>✅</td>
+<td><a href="https://developer.close.com/docs/authentication" target="_blank">Docs</a></td>
+<td><a href="https://developer.close.com/api-reference" target="_blank">Docs</a></td>
+<td><a href="https://close.com/pricing/" target="_blank">Docs</a></td>
+</tr>
+
+<tr>
+<td>-</td>
+<td>CRM, Marketing, Sales</td>
+<td>Comprehensive CRM platform offering marketing, sales, service, and content management tools for businesses.</td>
+<td>OAuth 2.0, Private Apps</td>
+<td>Yes</td>
+<td>REST + Webhooks</td>
+<td>Broad</td>
+<td>Unknown</td>
+<td>Yes</td>
+<td>N/A</td>
+<td>90</td>
+<td>❌</td>
+<td><a href="https://developers.hubspot.com/docs/api/authentication" target="_blank">Docs</a></td>
+<td><a href="https://developers.hubspot.com/docs/api" target="_blank">Docs</a></td>
+<td><a href="https://www.hubspot.com/pricing" target="_blank">Docs</a></td>
+</tr>
+
+<tr>
+<td>-</td>
+<td>Unknown</td>
+<td>Unknown</td>
+<td>API Keys, OAuth 2.0</td>
+<td>Yes</td>
+<td>REST + Webhooks</td>
+<td>Unknown</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>None apparent; comprehensive API and documentation available.</td>
+<td>90</td>
+<td>❌</td>
+<td><a href="https://www.attio.com/docs/api/authentication" target="_blank">Docs</a></td>
+<td><a href="https://www.attio.com/docs/api/attio-api" target="_blank">Docs</a></td>
+<td><a href="https://attio.com/pricing" target="_blank">Docs</a></td>
+</tr>
+
+<tr>
+<td>-</td>
+<td>CRM Software</td>
+<td>Cloud-based CRM platform to manage sales, marketing, and customer support operations.</td>
+<td>OAuth 2.0</td>
+<td>Yes</td>
+<td>REST + Webhooks</td>
+<td>Broad</td>
+<td>No</td>
+<td>Yes</td>
+<td></td>
+<td>98</td>
+<td>✅</td>
+<td><a href="https://www.zoho.com/crm/developer/docs/api/v6/oauth-overview.html" target="_blank">Docs</a></td>
+<td><a href="https://www.zoho.com/crm/developer/docs/api/v6/" target="_blank">Docs</a></td>
+<td><a href="https://www.zoho.com/crm/pricing.html" target="_blank">Docs</a></td>
+</tr>
+
+<tr>
+<td>-</td>
+<td>Sales CRM Software</td>
+<td>Sales CRM software designed to help small and medium businesses manage sales pipelines and close deals efficiently.</td>
+<td>OAuth 2.0, API Tokens</td>
+<td>Yes</td>
+<td>REST + Webhooks</td>
+<td>Broad</td>
+<td>No</td>
+<td>Yes</td>
+<td>None</td>
+<td>98</td>
+<td>✅</td>
+<td><a href="https://developers.pipedrive.com/docs/api/authentication" target="_blank">Docs</a></td>
+<td><a href="https://developers.pipedrive.com/api/v1" target="_blank">Docs</a></td>
+<td><a href="https://www.pipedrive.com/pricing" target="_blank">Docs</a></td>
+</tr>
+
+<tr>
+<td>-</td>
+<td>Enterprise CRM Platform</td>
+<td>Cloud-based CRM for sales, service, marketing, and analytics.</td>
+<td>OAuth 2.0</td>
+<td>Yes</td>
+<td>REST + Webhooks</td>
+<td>Broad</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>None, robust platform with comprehensive developer tools.</td>
+<td>95</td>
+<td>✅</td>
+<td><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/quickstart_oauth.htm" target="_blank">Docs</a></td>
+<td><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/sforce_rest_api_reference.htm" target="_blank">Docs</a></td>
+<td><a href="https://www.salesforce.com/pricing/" target="_blank">Docs</a></td>
+</tr>
+
+<tr>
+<td>-</td>
+<td>Team Communication Platform</td>
+<td>A messaging app for teams to communicate, collaborate, and share files in real-time with channels and direct messages.</td>
+<td>OAuth 2.0 (User, Bot, App Tokens)</td>
+<td>Yes</td>
+<td>REST + Webhooks</td>
+<td>Broad</td>
+<td>No</td>
+<td>Yes</td>
+<td>None</td>
+<td>-</td>
+<td>❌</td>
+<td><a href="https://api.slack.com/authentication" target="_blank">Docs</a></td>
+<td><a href="https://api.slack.com/methods" target="_blank">Docs</a></td>
+<td><a href="https://slack.com/pricing" target="_blank">Docs</a></td>
+</tr>
+
+<tr>
+<td>-</td>
+<td>Open-source CRM</td>
+<td>Open-source CRM for startups and small businesses. Manage customer relationships and sales.</td>
+<td>API Token</td>
+<td>Yes</td>
+<td>REST + Webhooks</td>
+<td>Broad</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>None</td>
+<td>98</td>
+<td>✅</td>
+<td><a href="https://docs.twenty.com/api-reference/authentication" target="_blank">Docs</a></td>
+<td><a href="https://docs.twenty.com/api-reference" target="_blank">Docs</a></td>
+<td><a href="https://twenty.com/pricing" target="_blank">Docs</a></td>
+</tr>
+
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- 10. Benchmark Dashboard -->
+    <section class="benchmark-section">
+        <div class="section-header">
+            <h2>📈 Benchmark Dashboard</h2>
+            <p>Visual distributions of the structured dataset.</p>
+        </div>
+        <div class="benchmark-grid">
+            
+<div class="benchmark-card">
+    <h3>Authentication Distribution</h3>
+    <div class="chart-container"><canvas id="authChart"></canvas></div>
+</div>
+<div class="benchmark-card">
+    <h3>API Types</h3>
+    <div class="chart-container"><canvas id="apiChart"></canvas></div>
+</div>
+<div class="benchmark-card">
+    <h3>Categories</h3>
+    <div class="chart-container"><canvas id="categoryChart"></canvas></div>
+</div>
+<div class="benchmark-card">
+    <h3>Buildability</h3>
+    <div class="chart-container"><canvas id="buildChart"></canvas></div>
+</div>
+<script>
+    window.CHART_DATA = {"total_apps": 8, "authentication": {"API Key or OAuth 2.0": 1, "OAuth 2.0, Private Apps": 1, "API Keys, OAuth 2.0": 1, "OAuth 2.0": 2, "OAuth 2.0, API Tokens": 1, "OAuth 2.0 (User, Bot, App Tokens)": 1, "API Token": 1}, "api_types": {"REST + Webhooks": 8}, "self_serve": {"Yes": 8}, "buildability": {"Yes": 8}, "categories": {"Sales CRM Platform": 1, "CRM, Marketing, Sales": 1, "Unknown": 1, "CRM Software": 1, "Sales CRM Software": 1, "Enterprise CRM Platform": 1, "Team Communication Platform": 1, "Open-source CRM": 1}, "top_blockers": {"Lack of MCP support for advanced integrations.": 1, "N/A": 1, "None apparent; comprehensive API and documentation available.": 1, "None, robust platform with comprehensive developer tools.": 1}, "average_confidence": 94.86, "verified_apps": 5, "total_corrections": 5};
+</script>
+
+        </div>
+    </section>
+
+    <!-- 11. Pattern Analysis / Insights -->
+    <section class="insight-section">
+        <div class="section-header">
+            <h2>🧠 Pattern Analysis & Insights</h2>
+            <p>Automated qualitative takeaways identified by the Analyzer.</p>
+        </div>
+        <div class="insight-grid">
+            
+<div class="insight-card">
+    <div class="insight-icon">🔑</div>
+    <h3>Authentication</h3>
+    <p>OAuth 2.0 is the dominant authentication method.</p>
+</div>
+
+<div class="insight-card">
+    <div class="insight-icon">🌐</div>
+    <h3>API Type</h3>
+    <p>REST + Webhooks is the most common API type.</p>
+</div>
+
+<div class="insight-card">
+    <div class="insight-icon">🏗️</div>
+    <h3>Agent Readiness</h3>
+    <p>8 applications appear immediately buildable.</p>
+</div>
+
+<div class="insight-card">
+    <div class="insight-icon">🚫</div>
+    <h3>Common Blockers</h3>
+    <p>The most common blocker is 'Lack of MCP support for advanced integrations.'.</p>
+</div>
+
+<div class="insight-card">
+    <div class="insight-icon">🚀</div>
+    <h3>Integration Potential</h3>
+    <p>Most applications expose public APIs, making them strong candidates for agent integrations.</p>
+</div>
+
+<div class="insight-card">
+    <div class="insight-icon">💡</div>
+    <h3>MCP Opportunities</h3>
+    <p>Native MCP support appears limited, representing an opportunity for custom Composio toolkits.</p>
+</div>
+
+        </div>
+    </section>
+
+    <!-- 12. Verification Process -->
+    <section class="verification-section">
+        <div class="section-header">
+            <h2>🛡️ Verification Process</h2>
+            <p>Metrics tracking the effectiveness of the adversarial Verification Agent.</p>
+        </div>
+        <div class="verification-grid">
+            
+<div class="summary-card">
+    <h3>Verified Apps</h3>
+    <h1>5</h1>
+</div>
+<div class="summary-card">
+    <h3>Failed Apps</h3>
+    <h1>3</h1>
+</div>
+<div class="summary-card">
+    <h3>Average Confidence</h3>
+    <h1>94.86%</h1>
+</div>
+<div class="summary-card">
+    <h3>Corrections</h3>
+    <h1>5</h1>
+</div>
+
+        </div>
+    </section>
+
+    <!-- 13. Challenges Encountered -->
+    <section class="text-section">
+        <div class="section-header">
+            <h2>🚧 Challenges Encountered</h2>
+        </div>
+        <div class="text-content">
+            <ul class="feature-list">
+                <li><strong>API Rate Limits:</strong> The free tier of the Gemini API imposes strict rate limits (20 requests per day). I mitigated this by implementing local JSON caching. If an API call fails with a 429 error, the pipeline gracefully skips the app without destroying previously gathered data.</li>
+                <li><strong>Hallucinated URLs:</strong> Early iterations of the LLM occasionally hallucinated documentation links. This was resolved by creating the adversarial Verification Agent, which cross-checks the URLs and applies corrections before saving the final state.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- 14. Future Improvements -->
+    <section class="text-section">
+        <div class="section-header">
+            <h2>🚀 Future Improvements</h2>
+        </div>
+        <div class="text-content">
+            <ul class="feature-list">
+                <li><strong>Parallel Processing:</strong> Implement <code>asyncio</code> to process multiple applications concurrently, drastically reducing pipeline execution time (assuming higher API quotas).</li>
+                <li><strong>Headless Browsing:</strong> Integrate Playwright or Selenium to scrape developer portals that require JavaScript rendering before passing the raw HTML to the LLM.</li>
+                <li><strong>Vector Database Integration:</strong> Embed the discovered API documentation into a vector database (e.g., Pinecone) to allow engineers to chat directly with the research dataset.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- 15. Technology Stack -->
+    <section class="tech-stack-section">
+        <div class="section-header">
+            <h2>💻 Technology Stack</h2>
+        </div>
+        <div class="tech-grid">
+            <div class="tech-card">Python</div>
+            <div class="tech-card">Gemini 2.5 Flash</div>
+            <div class="tech-card">HTML5</div>
+            <div class="tech-card">Vanilla CSS</div>
+            <div class="tech-card">JavaScript (ES6)</div>
+            <div class="tech-card">Chart.js</div>
+            <div class="tech-card">Mermaid.js</div>
+            <div class="tech-card">JSON</div>
+            <div class="tech-card">CSV</div>
+        </div>
+    </section>
+
+    <!-- 16. Deployment -->
+    <section class="text-section">
+        <div class="section-header">
+            <h2>🌐 Deployment</h2>
+        </div>
+        <div class="text-content">
+            <p>Because the final deliverable is a static HTML page, the report can be deployed anywhere with zero infrastructure overhead. The source code for this entire pipeline is hosted on GitHub.</p>
+            <p><strong>GitHub Repository:</strong> <a href="https://github.com/Ch-saketh/compose-agent-workflow" target="_blank">https://github.com/Ch-saketh/compose-agent-workflow</a></p>
+            <p><strong>Portfolio:</strong> <a href="https://saketh-chokkapu-portfolio.vercel.app" target="_blank">https://saketh-chokkapu-portfolio.vercel.app</a></p>
+            <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/saketh-chokkapu-3a668a2b9/" target="_blank">https://www.linkedin.com/in/saketh-chokkapu-3a668a2b9/</a></p>
+        </div>
+    </section>
+
+    <!-- 17. Conclusion -->
+    <section class="text-section">
+        <div class="section-header">
+            <h2>🏁 Conclusion</h2>
+        </div>
+        <div class="text-content">
+            <p>This project successfully demonstrates how decoupled, specialized AI agents can automate tedious data gathering tasks. By enforcing structured intermediate data (JSON) and utilizing an adversarial verification step, the pipeline delivers highly reliable, actionable intelligence for Product Operations teams.</p>
+        </div>
+    </section>
+
+    <!-- 18. Footer -->
+    <footer>
+        <div class="footer-links">
+            <a href="https://github.com/Ch-saketh/compose-agent-workflow" target="_blank">Repository</a>
+            <a href="https://saketh-chokkapu-portfolio.vercel.app" target="_blank">Portfolio</a>
+            <a href="https://www.linkedin.com/in/saketh-chokkapu-3a668a2b9/" target="_blank">LinkedIn</a>
+        </div>
+        <p class="footer-note">Built for Composio Product Operations Assignment</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
